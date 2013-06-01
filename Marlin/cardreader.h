@@ -1,5 +1,5 @@
-#ifndef __CARDREADERH
-#define __CARDREADERH
+#ifndef CARDREADER_H
+#define CARDREADER_H
 
 #ifdef SDSUPPORT
 
@@ -17,6 +17,7 @@ public:
 
   void checkautostart(bool x); 
   void openFile(char* name,bool read);
+  void openLogFile(char* name);
   void removeFile(char* name);
   void closefile();
   void release();
@@ -35,17 +36,20 @@ public:
   void setroot();
 
 
+  FORCE_INLINE bool isFileOpen() { return file.isOpen(); }
   FORCE_INLINE bool eof() { return sdpos>=filesize ;};
   FORCE_INLINE int16_t get() {  sdpos = file.curPosition();return (int16_t)file.read();};
   FORCE_INLINE void setIndex(long index) {sdpos = index;file.seekSet(index);};
-  FORCE_INLINE uint8_t percentDone(){if(!sdprinting) return 0; if(filesize) return sdpos*100/filesize; else return 0;};
+  FORCE_INLINE uint8_t percentDone(){if(!isFileOpen()) return 0; if(filesize) return sdpos/((filesize+99)/100); else return 0;};
   FORCE_INLINE char* getWorkDirName(){workDir.getFilename(filename);return filename;};
 
 public:
   bool saving;
+  bool logging;
   bool sdprinting ;  
   bool cardOK ;
-  char filename[11];
+  char filename[13];
+  char longFilename[LONG_FILENAME_LENGTH];
   bool filenameIsDir;
   int lastnr; //last number of the autostart;
 private:
@@ -65,7 +69,19 @@ private:
   char* diveDirName;
   void lsDive(const char *prepend,SdFile parent);
 };
+extern CardReader card;
 #define IS_SD_PRINTING (card.sdprinting)
+
+#if (SDCARDDETECT > -1)
+# ifdef SDCARDDETECTINVERTED 
+#  define IS_SD_INSERTED (READ(SDCARDDETECT)!=0)
+# else
+#  define IS_SD_INSERTED (READ(SDCARDDETECT)==0)
+# endif //SDCARDTETECTINVERTED
+#else
+//If we don't have a card detect line, aways asume the card is inserted
+# define IS_SD_INSERTED true
+#endif
 
 #else
 

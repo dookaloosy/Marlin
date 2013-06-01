@@ -1,23 +1,22 @@
-#ifndef __CONFIGURATION_ADV_H
-#define __CONFIGURATION_ADV_H
+#ifndef CONFIGURATION_ADV_H
+#define CONFIGURATION_ADV_H
 
 //===========================================================================
 //=============================Thermal Settings  ============================
 //===========================================================================
 
-// Select one of these only to define how the bed temp is read.
-//
-//#define BED_LIMIT_SWITCHING
 #ifdef BED_LIMIT_SWITCHING
   #define BED_HYSTERESIS 2 //only disable heating if T>target+BED_HYSTERESIS and enable heating if T>target-BED_HYSTERESIS
 #endif
-#define BED_CHECK_INTERVAL 5000 //ms
+#define BED_CHECK_INTERVAL 5000 //ms between checks in bang-bang control
 
 //// Heating sanity check:
 // This waits for the watchperiod in milliseconds whenever an M104 or M109 increases the target temperature
 // If the temperature has not increased at the end of that period, the target temperature is set to zero. 
-// It can be reset with another M104/M109
-//#define WATCHPERIOD 20000 //20 seconds
+// It can be reset with another M104/M109. This check is also only triggered if the target temperature and the current temperature
+//  differ by at least 2x WATCH_TEMP_INCREASE
+//#define WATCH_TEMP_PERIOD 40000 //40 seconds
+//#define WATCH_TEMP_INCREASE 10  //Heat up at least 10 degree in 20 seconds
 
 // Wait for Cooldown
 // This defines if the M109 call should not block if it is cooling down.
@@ -41,8 +40,8 @@
 // the target temperature is set to mintemp+factor*se[steps/sec] and limited by mintemp and maxtemp
 // you exit the value by any M109 without F*
 // Also, if the temperature is set to a value <mintemp, it is not changed by autotemp.
-// on an ultimaker, some initial testing worked with M109 S215 T260 F0.1 in the start.gcode
-//#define AUTOTEMP
+// on an ultimaker, some initial testing worked with M109 S215 B260 F1 in the start.gcode
+#define AUTOTEMP
 #ifdef AUTOTEMP
   #define AUTOTEMP_OLDWEIGHT 0.98
 #endif
@@ -64,19 +63,94 @@
 //This is for controlling a fan to cool down the stepper drivers
 //it will turn on when any driver is enabled
 //and turn off after the set amount of seconds from last driver being disabled again
-//#define CONTROLLERFAN_PIN 23 //Pin used for the fan to cool controller, comment out to disable this function
-#define CONTROLLERFAN_SEC 60 //How many seconds, after all motors were disabled, the fan should run
+#define CONTROLLERFAN_PIN -1 //Pin used for the fan to cool controller (-1 to disable)
+#define CONTROLLERFAN_SECS 60 //How many seconds, after all motors were disabled, the fan should run
+#define CONTROLLERFAN_SPEED 255  // == full speed
+
+// When first starting the main fan, run it at full speed for the
+// given number of milliseconds.  This gets the fan spinning reliably
+// before setting a PWM value. (Does not work with software PWM for fan on Sanguinololu)
+//#define FAN_KICKSTART_TIME 100
+
+// Extruder cooling fans
+// Configure fan pin outputs to automatically turn on/off when the associated
+// extruder temperature is above/below EXTRUDER_AUTO_FAN_TEMPERATURE.
+// Multiple extruders can be assigned to the same pin in which case 
+// the fan will turn on when any selected extruder is above the threshold.
+#define EXTRUDER_0_AUTO_FAN_PIN   -1
+#define EXTRUDER_1_AUTO_FAN_PIN   -1
+#define EXTRUDER_2_AUTO_FAN_PIN   -1
+#define EXTRUDER_AUTO_FAN_TEMPERATURE 50
+#define EXTRUDER_AUTO_FAN_SPEED   255  // == full speed
+
 
 //===========================================================================
 //=============================Mechanical Settings===========================
 //===========================================================================
 
-// This defines the number of extruders
-#define EXTRUDERS 1
-
 #define ENDSTOPS_ONLY_FOR_HOMING // If defined the endstops will only be used for homing
 
+
+//// AUTOSET LOCATIONS OF LIMIT SWITCHES
+//// Added by ZetaPhoenix 09-15-2012
+#ifdef MANUAL_HOME_POSITIONS  // Use manual limit switch locations
+  #define X_HOME_POS MANUAL_X_HOME_POS
+  #define Y_HOME_POS MANUAL_Y_HOME_POS
+  #define Z_HOME_POS MANUAL_Z_HOME_POS
+#else //Set min/max homing switch positions based upon homing direction and min/max travel limits
+  //X axis
+  #if X_HOME_DIR == -1
+    #ifdef BED_CENTER_AT_0_0
+      #define X_HOME_POS X_MAX_LENGTH * -0.5
+    #else
+      #define X_HOME_POS X_MIN_POS
+    #endif //BED_CENTER_AT_0_0
+  #else    
+    #ifdef BED_CENTER_AT_0_0
+      #define X_HOME_POS X_MAX_LENGTH * 0.5
+    #else
+      #define X_HOME_POS X_MAX_POS
+    #endif //BED_CENTER_AT_0_0
+  #endif //X_HOME_DIR == -1
+  
+  //Y axis
+  #if Y_HOME_DIR == -1
+    #ifdef BED_CENTER_AT_0_0
+      #define Y_HOME_POS Y_MAX_LENGTH * -0.5
+    #else
+      #define Y_HOME_POS Y_MIN_POS
+    #endif //BED_CENTER_AT_0_0
+  #else    
+    #ifdef BED_CENTER_AT_0_0
+      #define Y_HOME_POS Y_MAX_LENGTH * 0.5
+    #else
+      #define Y_HOME_POS Y_MAX_POS
+    #endif //BED_CENTER_AT_0_0
+  #endif //Y_HOME_DIR == -1
+  
+  // Z axis
+  #if Z_HOME_DIR == -1 //BED_CENTER_AT_0_0 not used
+    #define Z_HOME_POS Z_MIN_POS
+  #else    
+    #define Z_HOME_POS Z_MAX_POS
+  #endif //Z_HOME_DIR == -1
+#endif //End auto min/max positions
+//END AUTOSET LOCATIONS OF LIMIT SWITCHES -ZP
+
+
 //#define Z_LATE_ENABLE // Enable Z the last moment. Needed if your Z driver overheats.
+
+// A single Z stepper driver is usually used to drive 2 stepper motors.
+// Uncomment this define to utilize a separate stepper driver for each Z axis motor.
+// Only a few motherboards support this, like RAMPS, which have dual extruder support (the 2nd, often unused, extruder driver is used
+// to control the 2nd Z axis stepper motor). The pins are currently only defined for a RAMPS motherboards.
+// On a RAMPS (or other 5 driver) motherboard, using this feature will limit you to using 1 extruder.
+//#define Z_DUAL_STEPPER_DRIVERS
+
+#ifdef Z_DUAL_STEPPER_DRIVERS
+  #undef EXTRUDERS
+  #define EXTRUDERS 1
+#endif
 
 //homing hits the endstop, then retracts by this distance, before it tries to slowly bump again:
 #define X_HOME_RETRACT_MM 5 
@@ -88,14 +162,20 @@
 
 #define MAX_STEP_FREQUENCY 40000 // Max step frequency for Ultimaker (5000 pps / half step)
 
+//By default pololu step drivers require an active high signal. However, some high power drivers require an active low signal as step.
+#define INVERT_X_STEP_PIN false
+#define INVERT_Y_STEP_PIN false
+#define INVERT_Z_STEP_PIN false
+#define INVERT_E_STEP_PIN false
+
 //default stepper release if idle
 #define DEFAULT_STEPPER_DEACTIVE_TIME 60
 
 #define DEFAULT_MINIMUMFEEDRATE       0.0     // minimum feedrate
 #define DEFAULT_MINTRAVELFEEDRATE     0.0
 
-// minimum time in microseconds that a movement needs to take if the buffer is emptied.   Increase this number if you see blobs while printing high speed & high detail.  It will slowdown on the detailed stuff.
-#define DEFAULT_MINSEGMENTTIME        20000   // Obsolete delete this
+// minimum time in microseconds that a movement needs to take if the buffer is emptied.
+#define DEFAULT_MINSEGMENTTIME        20000
 
 // If defined the movements slow down when the look ahead buffer is only half full
 #define SLOWDOWN
@@ -108,25 +188,41 @@
 // Minimum planner junction speed. Sets the default minimum speed the planner plans for at the end
 // of the buffer and all stops. This should not be much greater than zero and should only be changed
 // if unwanted behavior is observed on a user's machine when running at very slow speeds.
-#define MINIMUM_PLANNER_SPEED 2.0 // (mm/sec)
+#define MINIMUM_PLANNER_SPEED 0.05// (mm/sec)
+
+// MS1 MS2 Stepper Driver Microstepping mode table
+#define MICROSTEP1 LOW,LOW
+#define MICROSTEP2 HIGH,LOW
+#define MICROSTEP4 LOW,HIGH
+#define MICROSTEP8 HIGH,HIGH
+#define MICROSTEP16 HIGH,HIGH
+
+// Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
+#define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
+
+// Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
+#define DIGIPOT_MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+
 
 //===========================================================================
 //=============================Additional Features===========================
 //===========================================================================
 
-
 #define SD_FINISHED_STEPPERRELEASE true  //if sd support and the file is finished: disable steppers?
-#define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // no z because of layer shift.
+#define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the z enabled so your bed stays in place.
 
-// The hardware watchdog should halt the Microcontroller, in case the firmware gets stuck somewhere. However:
-// the Watchdog is not working well, so please only enable this for testing
-// this enables the watchdog interrupt.
+// The hardware watchdog should reset the Microcontroller disabling all outputs, in case the firmware gets stuck and doesn't do temperature regulation.
 //#define USE_WATCHDOG
-//#ifdef USE_WATCHDOG
-  // you cannot reboot on a mega2560 due to a bug in he bootloader. Hence, you have to reset manually, and this is done hereby:
-//#define RESET_MANUAL
-//#define WATCHDOG_TIMEOUT 4  //seconds
-//#endif
+
+#ifdef USE_WATCHDOG
+// If you have a watchdog reboot in an ArduinoMega2560 then the device will hang forever, as a watchdog reset will leave the watchdog on.
+// The "WATCHDOG_RESET_MANUAL" goes around this by not using the hardware reset.
+//  However, THIS FEATURE IS UNSAFE!, as it will only work if interrupts are disabled. And the code could hang in an interrupt routine with interrupts disabled.
+//#define WATCHDOG_RESET_MANUAL
+#endif
+
+// Enable the option to stop SD printing when hitting and endstops, needs to be enabled from the LCD menu when this option is enabled.
+//#define ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
 
 // extruder advance constant (s2/mm3)
 //
@@ -147,20 +243,37 @@
 
 #endif // ADVANCE
 
-// A debugging feature to compare calculated vs performed steps, to see if steps are lost by the software.
-//#define DEBUG_STEPS
-
 // Arc interpretation settings:
 #define MM_PER_ARC_SEGMENT 1
 #define N_ARC_CORRECTION 25
 
-const int dropsegments=5; //everything with less than this number of steps will be ignored as move and joined with the next movement
+const unsigned int dropsegments=5; //everything with less than this number of steps will be ignored as move and joined with the next movement
 
 // If you are using a RAMPS board or cheap E-bay purchased boards that do not detect when an SD card is inserted
 // You can get round this by connecting a push button or single throw switch to the pin defined as SDCARDCARDDETECT 
 // in the pins.h file.  When using a push button pulling the pin to ground this will need inverted.  This setting should
 // be commented out otherwise
 #define SDCARDDETECTINVERTED 
+
+#ifdef ULTIPANEL
+ #undef SDCARDDETECTINVERTED
+#endif
+
+// Power Signal Control Definitions
+// By default use ATX definition
+#ifndef POWER_SUPPLY
+  #define POWER_SUPPLY 1
+#endif
+// 1 = ATX
+#if (POWER_SUPPLY == 1) 
+  #define PS_ON_AWAKE  LOW
+  #define PS_ON_ASLEEP HIGH
+#endif
+// 2 = X-Box 360 203W
+#if (POWER_SUPPLY == 2) 
+  #define PS_ON_AWAKE  HIGH
+  #define PS_ON_ASLEEP LOW
+#endif
 
 //===========================================================================
 //=============================Buffers           ============================
@@ -179,6 +292,29 @@ const int dropsegments=5; //everything with less than this number of steps will 
 #define MAX_CMD_SIZE 96
 #define BUFSIZE 4
 
+
+// Firmware based and LCD controled retract
+// M207 and M208 can be used to define parameters for the retraction. 
+// The retraction can be called by the slicer using G10 and G11
+// until then, intended retractions can be detected by moves that only extrude and the direction. 
+// the moves are than replaced by the firmware controlled ones.
+
+// #define FWRETRACT  //ONLY PARTIALLY TESTED
+#define MIN_RETRACT 0.1 //minimum extruded mm to accept a automatic gcode retraction attempt
+
+
+//adds support for experimental filament exchange support M600; requires display
+#ifdef ULTIPANEL
+  //#define FILAMENTCHANGEENABLE
+  #ifdef FILAMENTCHANGEENABLE
+    #define FILAMENTCHANGE_XPOS 3
+    #define FILAMENTCHANGE_YPOS 3
+    #define FILAMENTCHANGE_ZADD 10
+    #define FILAMENTCHANGE_FIRSTRETRACT -2
+    #define FILAMENTCHANGE_FINALRETRACT -100
+  #endif
+#endif
+ 
 //===========================================================================
 //=============================  Define Defines  ============================
 //===========================================================================
