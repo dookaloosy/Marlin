@@ -38,7 +38,7 @@ template <class T> int EEPROM_readAnything(int &ee, T& value)
 // the default values are used whenever there is a change to the data, to prevent
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
-#define EEPROM_VERSION "V05"  
+#define EEPROM_VERSION "VE9"  
 
 inline void EEPROM_StoreSettings() 
 {
@@ -66,6 +66,9 @@ inline void EEPROM_StoreSettings()
     EEPROM_writeAnything(i,0);
     EEPROM_writeAnything(i,0);
   #endif
+  EEPROM_writeAnything(i,x_max_length);
+  EEPROM_writeAnything(i,y_max_length);
+  EEPROM_writeAnything(i,z_max_length);
   char ver2[4]=EEPROM_VERSION;
   i=EEPROM_OFFSET;
   EEPROM_writeAnything(i,ver2); // validate data
@@ -128,6 +131,13 @@ inline void EEPROM_printSettings()
       SERIAL_ECHOPAIR(" D" ,Kd*PID_dT);
       SERIAL_ECHOLN(""); 
     #endif
+      SERIAL_ECHO_START;
+      SERIAL_ECHOLNPGM("Max lengths:");
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPAIR("   M208 X",x_max_length); 
+      SERIAL_ECHOPAIR(" Y" ,y_max_length); 
+      SERIAL_ECHOPAIR(" Z" ,z_max_length);
+      SERIAL_ECHOLN(""); 
   #endif
 } 
 
@@ -159,6 +169,9 @@ inline void EEPROM_RetrieveSettings(bool def=false)
       EEPROM_readAnything(i,Kp);
       EEPROM_readAnything(i,Ki);
       EEPROM_readAnything(i,Kd);
+      EEPROM_readAnything(i,x_max_length);
+      EEPROM_readAnything(i,y_max_length);
+      EEPROM_readAnything(i,z_max_length);
 
       SERIAL_ECHO_START;
       SERIAL_ECHOLNPGM("Stored settings retreived:");
@@ -183,6 +196,9 @@ inline void EEPROM_RetrieveSettings(bool def=false)
       max_xy_jerk=DEFAULT_XYJERK;
       max_z_jerk=DEFAULT_ZJERK;
       max_e_jerk=DEFAULT_EJERK;
+      x_max_length = X_MAX_LENGTH_DEFAULT;
+      y_max_length = Y_MAX_LENGTH_DEFAULT;
+      z_max_length = Z_MAX_LENGTH_DEFAULT;
       SERIAL_ECHO_START;
       SERIAL_ECHOLN("Using Default settings:");
     }

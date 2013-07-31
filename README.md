@@ -1,6 +1,10 @@
+This is a modified version of the printrbot official firmware (non Jr.) as of 7/31/13
+The modification adds the M208, "set axis max travel", code
+
 This version is for supporting Printrboard
 The copy at https://github.com/PxT/Marlin is the official source as shipped by Printrbot HQ.  
 MarlinProductionBolts.cpp.hex is the pre-compiled version shipped on printrboards as of May 2012
+Marlin.elkniwt.cpp.hex has the new M208 command.
 
 WARNING: 
 --------

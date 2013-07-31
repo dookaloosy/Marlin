@@ -130,9 +130,9 @@ void mc_arc(float *position, float *target, float *offset, uint8_t axis_0, uint8
     }
 
     if (max_software_endstops) {
-      if (arc_target[X_AXIS] > X_MAX_LENGTH) arc_target[X_AXIS] = X_MAX_LENGTH;
-      if (arc_target[Y_AXIS] > Y_MAX_LENGTH) arc_target[Y_AXIS] = Y_MAX_LENGTH;
-      if (arc_target[Z_AXIS] > Z_MAX_LENGTH) arc_target[Z_AXIS] = Z_MAX_LENGTH;
+      if (arc_target[X_AXIS] > x_max_length) arc_target[X_AXIS] = x_max_length;
+      if (arc_target[Y_AXIS] > y_max_length) arc_target[Y_AXIS] = y_max_length;
+      if (arc_target[Z_AXIS] > z_max_length) arc_target[Z_AXIS] = z_max_length;
     }
     plan_buffer_line(arc_target[X_AXIS], arc_target[Y_AXIS], arc_target[Z_AXIS], arc_target[E_AXIS], feed_rate, extruder);
     

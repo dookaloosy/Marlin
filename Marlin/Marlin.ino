@@ -99,6 +99,7 @@
 // M204 - Set default acceleration: S normal moves T filament only moves (M204 S3000 T7000) im mm/sec^2  also sets minimum segment time in ms (B20000) to prevent buffer underruns and M20 minimum feedrate
 // M205 -  advanced settings:  minimum travel speed S=while printing T=travel only,  B=minimum segment time X= maximum xy jerk, Z=maximum Z jerk, E=maximum E jerk
 // M206 - set additional homeing offset
+// M208 - set axis max travel
 // M220 S<factor in percent>- set speed factor override percentage
 // M221 S<factor in percent>- set extrude factor override percentage
 // M240 - Trigger a camera to take a photograph
@@ -134,6 +135,11 @@ float current_position[NUM_AXIS] = { 0.0, 0.0, 0.0, 0.0 };
 float add_homeing[3]={0,0,0};
 uint8_t active_extruder = 0;
 unsigned char FanSpeed=0;
+
+int x_max_length = X_MAX_LENGTH_DEFAULT;
+int y_max_length = Y_MAX_LENGTH_DEFAULT;
+int z_max_length = Z_MAX_LENGTH_DEFAULT;
+int* max_lengths[3] = { &x_max_length, &y_max_length, &z_max_length };
 
 //===========================================================================
 //=============================private variables=============================
@@ -509,12 +515,12 @@ bool code_seen(char code)
   return (strchr_pointer != NULL);  //Return True if a character was found
 }
 
-#define HOMEAXIS(LETTER) \
+#define HOMEAXIS(LETTER,letter) \
   if ((LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1) || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1))\
     { \
     current_position[LETTER##_AXIS] = 0; \
     plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]); \
-    destination[LETTER##_AXIS] = 1.5 * LETTER##_MAX_LENGTH * LETTER##_HOME_DIR; \
+    destination[LETTER##_AXIS] = 1.5 * letter##_max_length * LETTER##_HOME_DIR; \
     feedrate = homing_feedrate[LETTER##_AXIS]; \
     plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder); \
     st_synchronize();\
@@ -530,7 +536,7 @@ bool code_seen(char code)
     plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder); \
     st_synchronize();\
     \
-    current_position[LETTER##_AXIS] = (LETTER##_HOME_DIR == -1) ? LETTER##_HOME_POS : LETTER##_MAX_LENGTH;\
+    current_position[LETTER##_AXIS] = (LETTER##_HOME_DIR == -1) ? LETTER##_HOME_POS : letter##_max_length;\
     destination[LETTER##_AXIS] = current_position[LETTER##_AXIS];\
     feedrate = 0.0;\
     endstops_hit_on_purpose();\
@@ -593,15 +599,15 @@ void process_commands()
         current_position[X_AXIS] = 0;current_position[Y_AXIS] = 0;  
 
         plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]); 
-        destination[X_AXIS] = 1.5 * X_MAX_LENGTH * X_HOME_DIR;destination[Y_AXIS] = 1.5 * Y_MAX_LENGTH * Y_HOME_DIR;  
+        destination[X_AXIS] = 1.5 * x_max_length * X_HOME_DIR;destination[Y_AXIS] = 1.5 * y_max_length * Y_HOME_DIR;  
         feedrate = homing_feedrate[X_AXIS]; 
         if(homing_feedrate[Y_AXIS]<feedrate)
           feedrate =homing_feedrate[Y_AXIS]; 
         plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
         st_synchronize();
     
-        current_position[X_AXIS] = (X_HOME_DIR == -1) ? X_HOME_POS : X_MAX_LENGTH;
-        current_position[Y_AXIS] = (Y_HOME_DIR == -1) ? Y_HOME_POS : Y_MAX_LENGTH;
+        current_position[X_AXIS] = (X_HOME_DIR == -1) ? X_HOME_POS : x_max_length;
+        current_position[Y_AXIS] = (Y_HOME_DIR == -1) ? Y_HOME_POS : y_max_length;
         plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
         destination[X_AXIS] = current_position[X_AXIS];
         destination[Y_AXIS] = current_position[Y_AXIS];
@@ -614,15 +620,15 @@ void process_commands()
       
       if((home_all_axis) || (code_seen(axis_codes[X_AXIS]))) 
       {
-        HOMEAXIS(X);
+        HOMEAXIS(X,x);
       }
 
       if((home_all_axis) || (code_seen(axis_codes[Y_AXIS]))) {
-       HOMEAXIS(Y);
+       HOMEAXIS(Y,y);
       }
       
       if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
-        HOMEAXIS(Z);
+        HOMEAXIS(Z,z);
       }
       
       if(code_seen(axis_codes[X_AXIS])) 
@@ -1131,6 +1137,11 @@ void process_commands()
       {
         if(code_seen(axis_codes[i])) add_homeing[i] = code_value();
       }
+    case 208: // M208 set axis max travel
+      for(int8_t i=0; i < 3; i++) 
+      {
+        if(code_seen(axis_codes[i])) *max_lengths[i] = code_value();
+      }
       break;
     case 220: // M220 S<factor in percent>- set speed factor override percentage
     {
@@ -1315,9 +1326,9 @@ void prepare_move()
   }
 
   if (max_software_endstops) {
-    if (destination[X_AXIS] > X_MAX_LENGTH) destination[X_AXIS] = X_MAX_LENGTH;
-    if (destination[Y_AXIS] > Y_MAX_LENGTH) destination[Y_AXIS] = Y_MAX_LENGTH;
-    if (destination[Z_AXIS] > Z_MAX_LENGTH) destination[Z_AXIS] = Z_MAX_LENGTH;
+    if (destination[X_AXIS] > x_max_length) destination[X_AXIS] = x_max_length;
+    if (destination[Y_AXIS] > y_max_length) destination[Y_AXIS] = y_max_length;
+    if (destination[Z_AXIS] > z_max_length) destination[Z_AXIS] = z_max_length;
   }
   previous_millis_cmd = millis();  
   plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
