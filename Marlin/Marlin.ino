@@ -1137,6 +1137,7 @@ void process_commands()
       {
         if(code_seen(axis_codes[i])) add_homeing[i] = code_value();
       }
+      break;
     case 208: // M208 set axis max travel
       for(int8_t i=0; i < 3; i++) 
       {
