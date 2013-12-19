@@ -154,6 +154,8 @@ const bool Z_ENDSTOPS_INVERTING = false; // set to true to invert the logic of t
 extern int x_max_length;
 extern int y_max_length;
 extern int z_max_length;
+extern float x_skew_percent;
+extern float y_skew_percent;
 
 // The position of the homing switches. Use MAX_LENGTH * -0.5 if the center should be 0, 0, 0
 #define X_HOME_POS 0

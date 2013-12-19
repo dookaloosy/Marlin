@@ -38,7 +38,7 @@ template <class T> int EEPROM_readAnything(int &ee, T& value)
 // the default values are used whenever there is a change to the data, to prevent
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
-#define EEPROM_VERSION "VE9"  
+#define EEPROM_VERSION "VEA"  
 
 inline void EEPROM_StoreSettings() 
 {
@@ -69,6 +69,8 @@ inline void EEPROM_StoreSettings()
   EEPROM_writeAnything(i,x_max_length);
   EEPROM_writeAnything(i,y_max_length);
   EEPROM_writeAnything(i,z_max_length);
+  EEPROM_writeAnything(i,x_skew_percent);
+  EEPROM_writeAnything(i,y_skew_percent);
   char ver2[4]=EEPROM_VERSION;
   i=EEPROM_OFFSET;
   EEPROM_writeAnything(i,ver2); // validate data
@@ -138,6 +140,12 @@ inline void EEPROM_printSettings()
       SERIAL_ECHOPAIR(" Y" ,y_max_length); 
       SERIAL_ECHOPAIR(" Z" ,z_max_length);
       SERIAL_ECHOLN(""); 
+      SERIAL_ECHO_START;
+      SERIAL_ECHOLNPGM("Skew factors:");
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPAIR("   M209 X",x_skew_percent); 
+      SERIAL_ECHOPAIR(" Y" ,y_skew_percent); 
+      SERIAL_ECHOLN(""); 
   #endif
 } 
 
@@ -172,6 +180,8 @@ inline void EEPROM_RetrieveSettings(bool def=false)
       EEPROM_readAnything(i,x_max_length);
       EEPROM_readAnything(i,y_max_length);
       EEPROM_readAnything(i,z_max_length);
+      EEPROM_readAnything(i,x_skew_percent);
+      EEPROM_readAnything(i,y_skew_percent);
 
       SERIAL_ECHO_START;
       SERIAL_ECHOLNPGM("Stored settings retreived:");
@@ -199,6 +209,8 @@ inline void EEPROM_RetrieveSettings(bool def=false)
       x_max_length = X_MAX_LENGTH_DEFAULT;
       y_max_length = Y_MAX_LENGTH_DEFAULT;
       z_max_length = Z_MAX_LENGTH_DEFAULT;
+      x_skew_percent = 0.0;
+      y_skew_percent = 0.0;
       SERIAL_ECHO_START;
       SERIAL_ECHOLN("Using Default settings:");
     }

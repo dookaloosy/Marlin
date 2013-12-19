@@ -100,6 +100,7 @@
 // M205 -  advanced settings:  minimum travel speed S=while printing T=travel only,  B=minimum segment time X= maximum xy jerk, Z=maximum Z jerk, E=maximum E jerk
 // M206 - set additional homeing offset
 // M208 - set axis max travel
+// M209 - set X and Y skew relative to Z
 // M220 S<factor in percent>- set speed factor override percentage
 // M221 S<factor in percent>- set extrude factor override percentage
 // M240 - Trigger a camera to take a photograph
@@ -140,6 +141,10 @@ int x_max_length = X_MAX_LENGTH_DEFAULT;
 int y_max_length = Y_MAX_LENGTH_DEFAULT;
 int z_max_length = Z_MAX_LENGTH_DEFAULT;
 int* max_lengths[3] = { &x_max_length, &y_max_length, &z_max_length };
+
+float x_skew_percent = 0.0;
+float y_skew_percent = 0.0;
+float* skew_percents[2] = { &x_skew_percent, &y_skew_percent };
 
 //===========================================================================
 //=============================private variables=============================
@@ -1142,6 +1147,12 @@ void process_commands()
       for(int8_t i=0; i < 3; i++) 
       {
         if(code_seen(axis_codes[i])) *max_lengths[i] = code_value();
+      }
+      break;
+    case 209: // M209 set X and Y skew
+      for(int8_t i=0; i < 2; i++) 
+      {
+        if(code_seen(axis_codes[i])) *skew_percents[i] = code_value();
       }
       break;
     case 220: // M220 S<factor in percent>- set speed factor override percentage
