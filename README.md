@@ -1,5 +1,6 @@
 This is a modified version of the printrbot official firmware (non Jr.) as of 7/31/13
-The modification adds the M208, "set axis max travel", code
+The modification adds the M208, "set axis max travel", code and a custom M209 "set X and Y
+skew relative to Z" adjustment for compensating the Printrbot Simple Y-Axis sag.
 
 This version is for supporting Printrboard
 The copy at https://github.com/PxT/Marlin is the official source as shipped by Printrbot HQ.  
