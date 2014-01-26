@@ -156,6 +156,7 @@ extern int y_max_length;
 extern int z_max_length;
 extern float x_skew_percent;
 extern float y_skew_percent;
+extern bool enable_skew;
 
 // The position of the homing switches. Use MAX_LENGTH * -0.5 if the center should be 0, 0, 0
 #define X_HOME_POS 0

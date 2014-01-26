@@ -145,6 +145,7 @@ int* max_lengths[3] = { &x_max_length, &y_max_length, &z_max_length };
 float x_skew_percent = 0.0;
 float y_skew_percent = 0.0;
 float* skew_percents[2] = { &x_skew_percent, &y_skew_percent };
+bool enable_skew = true;
 
 //===========================================================================
 //=============================private variables=============================
@@ -592,6 +593,7 @@ void process_commands()
       previous_millis_cmd = millis();
       
       enable_endstops(true);
+      enable_skew = false;
       
       for(int8_t i=0; i < NUM_AXIS; i++) {
         destination[i] = current_position[i];
@@ -659,6 +661,7 @@ void process_commands()
       #ifdef ENDSTOPS_ONLY_FOR_HOMING
         enable_endstops(false);
       #endif
+      enable_skew = true;
       
       feedrate = saved_feedrate;
       feedmultiply = saved_feedmultiply;

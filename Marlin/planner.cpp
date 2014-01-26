@@ -475,8 +475,16 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   // Calculate target position in absolute steps
   //this should be done after the wait, because otherwise a M92 code within the gcode disrupts this calculation somehow
   long target[4];
-  target[X_AXIS] = lround((x+x_skew_percent*z/100.0)*axis_steps_per_unit[X_AXIS]);
-  target[Y_AXIS] = lround((y+y_skew_percent*z/100.0)*axis_steps_per_unit[Y_AXIS]);
+  if(enable_skew)
+  {
+    target[X_AXIS] = lround((x+x_skew_percent*z/100.0)*axis_steps_per_unit[X_AXIS]);
+    target[Y_AXIS] = lround((y+y_skew_percent*z/100.0)*axis_steps_per_unit[Y_AXIS]);
+  }
+  else
+  {
+    target[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]);
+    target[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]);
+  }
   target[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);     
   target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);
   
@@ -799,8 +807,16 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
 
 void plan_set_position(const float &x, const float &y, const float &z, const float &e)
 {
-  position[X_AXIS] = lround((x+x_skew_percent*z/100.0)*axis_steps_per_unit[X_AXIS]);
-  position[Y_AXIS] = lround((y+y_skew_percent*z/100.0)*axis_steps_per_unit[Y_AXIS]);
+  if(enable_skew)
+  {
+    position[X_AXIS] = lround((x+x_skew_percent*z/100.0)*axis_steps_per_unit[X_AXIS]);
+    position[Y_AXIS] = lround((y+y_skew_percent*z/100.0)*axis_steps_per_unit[Y_AXIS]);
+  }
+  else
+  {
+    position[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]);
+    position[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]);
+  }
   position[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);     
   position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);  
   st_set_position(position[X_AXIS], position[Y_AXIS], position[Z_AXIS], position[E_AXIS]);
