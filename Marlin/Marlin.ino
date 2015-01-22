@@ -111,6 +111,7 @@
 // M501 - reads parameters from EEPROM (if you need reset them after you changed them temporarily).  
 // M502 - reverts to the default "factory settings".  You still need to store them in EEPROM afterwards if you want to.
 // M503 - print the current settings (from memory not from eeprom)
+// M700 - P<head_number> S<nozzle_bits> Write to inkjet head
 // M303 - PID relay autotune S<temperature> sets the target temperature. (default target temperature = 150C)
 
 //Stepper Movement Variables
@@ -146,6 +147,13 @@ float x_skew_percent = 0.0;
 float y_skew_percent = 0.0;
 float* skew_percents[2] = { &x_skew_percent, &y_skew_percent };
 bool enable_skew = true;
+
+#ifdef HPC6602
+uint16_t strip;
+unsigned long last_inkjet[NUM_HPC6602];
+uint8_t ink_jet_number = 0;
+uint8_t pulse_pin;
+#endif
 
 //===========================================================================
 //=============================private variables=============================
@@ -258,6 +266,40 @@ void suicide()
   #endif
 }
 
+void hpc6602_init()
+{
+  #if defined(INK_PINA) && INK_PINA > -1
+    SET_OUTPUT(INK_PINA);
+  #endif
+  #if defined(INK_PINB) && INK_PINB > -1
+    SET_OUTPUT(INK_PINB);
+  #endif
+  #if defined(INK_PINC) && INK_PINC > -1
+    SET_OUTPUT(INK_PINC);
+  #endif
+  #if defined(INK_PIND) && INK_PIND > -1
+    SET_OUTPUT(INK_PIND);
+  #endif
+  #if defined(INK_PULSE0) && INK_PULSE0 > -1
+    SET_OUTPUT(INK_PULSE0);
+  #endif
+  #if defined(INK_PULSE1) && INK_PULSE1 > -1
+    SET_OUTPUT(INK_PULSE1);
+  #endif
+  #if defined(INK_PULSE2) && INK_PULSE2 > -1
+    SET_OUTPUT(INK_PULSE2);
+  #endif
+  #if defined(INK_PULSE3) && INK_PULSE3 > -1
+    SET_OUTPUT(INK_PULSE3);
+  #endif
+  #if defined(INK_PULSE4) && INK_PULSE4 > -1
+    SET_OUTPUT(INK_PULSE4);
+  #endif
+  #if defined(INK_PULSE5) && INK_PULSE5 > -1
+    SET_OUTPUT(INK_PULSE5);
+  #endif
+}
+
 void setup()
 { 
   setup_powerhold();
@@ -308,6 +350,7 @@ void setup()
   st_init();    // Initialize stepper;
   wd_init();
   setup_photpin();
+  hpc6602_init();
 }
 
 
@@ -1262,6 +1305,82 @@ void process_commands()
       EEPROM_printSettings();
     }
     break;
+    #if defined(HPC6602)
+      case 700:
+        if (code_seen('P'))
+        {
+          switch((int)code_value())
+          {
+          #if defined(INK_PULSE0) && INK_PULSE0 > -1
+            case 0:
+              pulse_pin = INK_PULSE0;
+              ink_jet_number = 0;
+              break;
+          #endif
+          #if defined(INK_PULSE1) && INK_PULSE1 > -1
+            case 1:
+              pulse_pin = INK_PULSE1;
+              ink_jet_number = 1;
+              break;
+          #endif
+          #if defined(INK_PULSE2) && INK_PULSE2 > -1
+            case 2:
+              pulse_pin = INK_PULSE2;
+              ink_jet_number = 2;
+              break;
+          #endif
+          #if defined(INK_PULSE3) && INK_PULSE3 > -1
+            case 3:
+              pulse_pin = INK_PULSE3;
+              ink_jet_number = 3;
+              break;
+          #endif
+          #if defined(INK_PULSE4) && INK_PULSE4 > -1
+            case 4:
+              pulse_pin = INK_PULSE4;
+              ink_jet_number = 4;
+              break;
+          #endif
+          #if defined(INK_PULSE5) && INK_PULSE5 > -1
+            case 5:
+              pulse_pin = INK_PULSE5;
+              ink_jet_number = 5;
+              break;
+          #endif
+          }
+          if (code_seen('S'))
+          {
+            strip = code_value();
+            while(last_inkjet[ink_jet_number] + 800 > micros());
+            //loop through the nozzles
+            for(uint8_t i = 0; i <= 11; i++){
+              //See if nozzle is set to fire
+              if(strip & 1<<i){
+                //Write the nozzle number to the pin shield as 4 bits
+                if(i & 1<<0)
+                  WRITE(INK_PINA, 1);
+                if(i & 1<<1)
+                  WRITE(INK_PINB, 1);
+                if(i & 1<<2)
+                  WRITE(INK_PINC, 1);
+                if(i & 1<<3)
+                  WRITE(INK_PIND, 1);
+                //Fire the Nozzle
+                digitalWrite(pulse_pin, HIGH);
+                delayMicroseconds(5);
+                //Set everything low
+                digitalWrite(pulse_pin, LOW);
+                WRITE(INK_PINA, 0);
+                WRITE(INK_PINB, 0);
+                WRITE(INK_PINC, 0);
+                WRITE(INK_PIND, 0);
+              }
+              last_inkjet[ink_jet_number] = micros();
+            }
+          }
+        }
+        break;
+    #endif
 
     }
   }

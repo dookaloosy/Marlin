@@ -8,8 +8,8 @@
 //User specified version info of THIS file to display in [Pronterface, etc] terminal window during startup.
 //Implementation of an idea by Prof Braino to inform user that any changes made
 //to THIS file by the user have been successfully uploaded into firmware.
-#define STRING_VERSION_CONFIG_H "2013-07-27" //Personal revision number for changes to THIS file.
-#define STRING_CONFIG_H_AUTHOR "elkniwt" //Who made the changes.
+#define STRING_VERSION_CONFIG_H "2015-01-21" //Personal revision number for changes to THIS file.
+#define STRING_CONFIG_H_AUTHOR "dookaloosy" //Who made the changes.
 
 // This determines the communication speed of the printer
 #define BAUDRATE 250000
@@ -68,9 +68,9 @@
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define HEATER_0_MAXTEMP 250
-#define HEATER_1_MAXTEMP 250
-#define HEATER_2_MAXTEMP 250
+#define HEATER_0_MAXTEMP 300
+#define HEATER_1_MAXTEMP 300
+#define HEATER_2_MAXTEMP 300
 #define BED_MAXTEMP 150
 
 
@@ -222,6 +222,12 @@ extern bool enable_skew;
     #define LCD_WIDTH 16
     #define LCD_HEIGHT 2
   #endif
+#endif
+
+// Support for the inkshield/HPC6602
+#define HPC6602
+#ifdef HPC6602
+  #define NUM_HPC6602 1 // Number of Inkjet heads
 #endif
 
 // M240  Triggers a camera by emulating a Canon RC-1 Remote

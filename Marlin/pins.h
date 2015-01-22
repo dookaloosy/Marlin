@@ -931,6 +931,31 @@
   #define MISO_PIN         11
   #define MOSI_PIN         10
 #endif
+
+#ifdef HPC6602
+  #define INK_PINA         4
+  #define INK_PINB         5
+  #define INK_PINC         6
+  #define INK_PIND         7
+  #if NUM_HPC6602 >= 1
+    #define INK_PULSE0     8
+  #endif
+  #if NUM_HPC6602 >= 2
+    #define INK_PULSE1     9
+  #endif
+  #if NUM_HPC6602 >= 3
+    #define INK_PULSE2     10
+  #endif
+  #if NUM_HPC6602 >= 4
+    #define INK_PULSE3     11
+  #endif
+  #if NUM_HPC6602 >= 5
+    #define INK_PULSE4     12
+  #endif
+  #if NUM_HPC6602 >= 6
+    #define INK_PULSE5     -1
+  #endif
+#endif
 #endif
 
 /****************************************************************************************
