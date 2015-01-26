@@ -11,16 +11,16 @@ Connections between the Printrboard and Inkshield:
 
 Inkshield		Printrboard			Marlin
 -------------------------------------------------
-	A			EXP2:PD4		}	12-bits
-	B			EXP2:PD5		}	define
-	C			EXP2:PD6		}	nozzle
-	D			EXP2:PD7		}	combo S
-  PULSE2-12		EXP2:PE0			P0 (1st color)
-  PULSE2-12		EXP2:PE1			P1 (2nd color)
-  PULSE2-12		EXP2:PC0			P2 (3rd color)
-  PULSE2-12		EXP2:PC1			P3 (4th color)
-  PULSE2-12		EXP2:PC2			P4 (5th color)
-  unused		none				P5 (6th color)
+A				EXP2:PD4		}	12-bits
+B				EXP2:PD5		}	define
+C				EXP2:PD6		}	nozzle
+D				EXP2:PD7		}	combo S
+PULSE2-12		EXP2:PE0			P0 (1st color)
+PULSE2-12		EXP2:PE1			P1 (2nd color)
+PULSE2-12		EXP2:PC0			P2 (3rd color)
+PULSE2-12		EXP2:PC1			P3 (4th color)
+PULSE2-12		EXP2:PC2			P4 (5th color)
+unused			none				P5 (6th color)
 
 
 OLDER INFO
