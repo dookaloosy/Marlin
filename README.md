@@ -3,6 +3,29 @@ The modification adds the M700 code, "write to inkjet head", for use with the <a
 The Printrboard controls the Inkshield via the EXP2 header. This is a mashup between https://github.com/Elkniwt/Marlin and https://github.com/NicholasCLewis/InkShield and https://github.com/sjkelly/AMRI-Rice-201308-sjkelly
 Marlin.dookaloosy.cpp.hex has the new M700 command.
 
+HOW TO USE
+==========
+M700 Px Sy - Trigger a single pulse to channel x (0 to 5), firing the combination of nozzles defined by y (0 to 4095). See Inkshield documentation for more detail.
+
+Connections between the Printrboard and Inkshield:
+
+Inkshield		Printrboard			Marlin
+-------------------------------------------------
+	A			EXP2:PD4		}	12-bits
+	B			EXP2:PD5		}	define
+	C			EXP2:PD6		}	nozzle
+	D			EXP2:PD7		}	combo S
+  PULSE2-12		EXP2:PE0			P0 (1st color)
+  PULSE2-12		EXP2:PE1			P1 (2nd color)
+  PULSE2-12		EXP2:PC0			P2 (3rd color)
+  PULSE2-12		EXP2:PC1			P3 (4th color)
+  PULSE2-12		EXP2:PC2			P4 (5th color)
+  unused		none				P5 (6th color)
+
+
+OLDER INFO
+----------
+
 This is a modified version of the printrbot official firmware (non Jr.) as of 7/31/13
 The modification adds the M208, "set axis max travel", code and a custom M209 "set X and Y
 skew relative to Z" adjustment for compensating the Printrbot Simple Y-Axis sag.
