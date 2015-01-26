@@ -7,6 +7,8 @@ HOW TO USE
 ==========
 M700 Px Sy - Trigger a single pulse to channel x (0 to 5), firing the combination of nozzles defined by y (0 to 4095). See Inkshield documentation for more detail.
 
+The Inkshield needs connections to +12V, +5V and GND. This can be supplied to AUX_IN on the Inkshield from the ATX power supply that powers the Printrbot.
+
 Connections between the Printrboard and Inkshield:
 
 	Inkshield	Printrboard			Marlin
