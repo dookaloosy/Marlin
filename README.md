@@ -2,6 +2,7 @@ This is a modified version of the printrbot official firmware (non Jr.) as of 1/
 The modification adds the M700 code, "write to inkjet head", for use with the <a href="https://github.com/NicholasCLewis/InkShield">Inkshield</a>.
 The Printrboard controls the Inkshield via the EXP2 header. This is a mashup between https://github.com/Elkniwt/Marlin and https://github.com/NicholasCLewis/InkShield and https://github.com/sjkelly/AMRI-Rice-201308-sjkelly
 Marlin.dookaloosy.cpp.hex has the new M700 command.
+A demo video can be found at https://www.youtube.com/watch?v=mLGPea7ZamE
 
 HOW TO USE
 ==========
