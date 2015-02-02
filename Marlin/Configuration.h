@@ -227,7 +227,7 @@ extern bool enable_skew;
 // Support for the inkshield/HPC6602
 #define HPC6602
 #ifdef HPC6602
-  #define NUM_HPC6602 1 // Number of Inkjet heads
+  #define NUM_HPC6602 5 // Number of Inkjet heads
 #endif
 
 // M240  Triggers a camera by emulating a Canon RC-1 Remote
